@@ -1,18 +1,12 @@
 <template>
   <v-container>
-    <v-slider v-model="onoff" min="0" max="1" label="On / Off"> </v-slider>
-    <v-slider
-      v-model="velocity"
-      min="-100"
-      max="100"
-      label="Hastighet"
-    ></v-slider>
-    <v-slider
-      v-model="direction"
-      min="-90"
-      max="90"
-      label="Riktning"
-    ></v-slider>
+    <v-slider v-model="onoff" min="0" max="1" label="Off / On"> </v-slider>
+    <v-slider v-model="velocity" min="0" max="200" label="Hastighet"></v-slider>
+    <v-slider v-model="direction" min="0" max="180" label="Riktning"></v-slider>
+    <v-col cols="120" sm="60">
+      <p>Velocity = {{ this.velocity - 100 }}</p>
+      <p>Direction = {{ this.direction - 90 }}</p>
+    </v-col>
   </v-container>
 </template>
 
@@ -23,10 +17,9 @@ export default {
 
   data: () => ({
     client: "",
-    payload: "YEs",
-    velocity: "0",
-    direction: "0",
-    onoff: "1",
+    velocity: "100",
+    direction: "90",
+    onoff: "0",
   }),
 
   created() {
@@ -43,12 +36,21 @@ export default {
   methods: {
     sendPayload() {
       if (this.onoff !== 0) {
-        if (this.direction !== 0 || this.velocity !== 0) {
-          this.client.publish(
-            "gabriel.bergdahl@abbindustrigymnasium.se/driverbot",
-            this.velocity.toString() + " " + this.direction.toString()
-          );
-        }
+        let fast =
+          "0".repeat(4 - this.velocity.toString().length) +
+          this.velocity.toString();
+        let angles =
+          "0".repeat(4 - this.direction.toString().length) +
+          this.direction.toString();
+        this.client.publish(
+          "gabriel.bergdahl@abbindustrigymnasium.se/driverbot",
+          fast.toString() + angles.toString()
+        );
+      } else {
+        this.client.publish(
+          "gabriel.bergdahl@abbindustrigymnasium.se/driverbot",
+          "01000090"
+        );
       }
     },
   },

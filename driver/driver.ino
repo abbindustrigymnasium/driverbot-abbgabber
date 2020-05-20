@@ -2,25 +2,21 @@
 #include <PubSubClient.h>
 #include <Servo.h>
 Servo servo;
-//First, we install some libraries to help control the driverbot
-// The libraries are: a wifi client for the esp8266, a mqtt library to connect to the broker, and a servo library to control the servo
 
-// Here, we define some pins for the engine
+
 #define motorPinRightDir  0//D2
 #define motorPinRightSpeed 5//D1
-#define motorPinLeftDir 2
-#define motorPinLeftSpeed 4
 
 // Here, we define some variables that will be sent to the engine and servo later on
 String vel = "";
 String dir = "0";
 int velint = 0;
 String deg = "90";
-String pay = "";
+String data = "";
 
 // Here, we have the ssid and password for the local wifi, which is necessary for the microcontroller to connect to the broker
 const char* ssid = "edimax_2.4G";
-const char* password =  "admin123";
+const char* password =  "Admin123";
 
 // Here, we define some things for the mqtt library like our username and password
 const char* mqttServer = "maqiatto.com";
@@ -40,32 +36,24 @@ void setup() {
   // We also define where the servo is connected, and tell it write 90 degrees, straight forward, at the start of the program
   pinMode(motorPinRightDir, OUTPUT);
   pinMode(motorPinRightSpeed, OUTPUT);
-  pinMode(motorPinLeftDir, OUTPUT);
-  pinMode(motorPinLeftSpeed, OUTPUT);
   servo.attach(15);
   servo.write(90);
 
   Serial.begin(115200);
 
-  //  This is where the microcontroller connects to the wifi
   WiFi.begin(ssid, password);
-
-  //  While connecting, it writes that it is connecting to the wifi, and when connected, it says so
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.println("Connecting to WiFi..");
   }
   Serial.println("Connected to the WiFi network");
 
-  //  Defines some mqtt things, the broker and port we use and the function used to callback when a message is received
   client.setServer(mqttServer, mqttPort);
   client.setCallback(callback);
-
-  //  Here, we connect the microcontroller to the mqtt broker
   while (!client.connected()) {
     Serial.println("Connecting to MQTT...");
 
-    if (client.connect("CatGang", mqttUser, mqttPassword )) {
+    if (client.connect("catgang", mqttUser, mqttPassword )) {
 
       Serial.println("connected");
 
@@ -77,9 +65,46 @@ void setup() {
 
     }
   }
-
-  //  Publishes a message in the topic, and also subscribes to the same topic where it will fetch data later
-  client.publish("gabriel.bergdahl@abbindustrigymnasium.se/driverbot");
+  client.publish("gabriel.bergdahl@abbindustrigymnasium.se/driverbot", "CatGang");
   client.subscribe("gabriel.bergdahl@abbindustrigymnasium.se/driverbot");
 
+}
+
+void loop() {
+  // Here, we write to the engine and servo with the data received from the mqtt broker
+  // We also log the direction, velocity and the angle for the servo to be used for basic debugging in the serial monitor
+  velint = vel.toInt();
+  client.loop();
+  digitalWrite(motorPinRightDir, dir.toInt());
+  analogWrite(motorPinRightSpeed, velint);
+  servo.write(deg.toInt());
+  /*Serial.println(dir + vel + deg);*/
+}
+
+
+void callback(char* topic, byte* payload, unsigned int length) {
+
+  data = "";
+  Serial.print("Message:");
+  for (int i = 0; i < length; i++) {
+    data += (char)payload[i];
+  }
+
+  Serial.println(data);
+
+  vel = data.substring(0, 4);
+  vel = vel.toInt()- 100;
+  if (vel.toInt() > 0 ) {
+    dir = "1";
+  }
+  else {
+    vel = vel.toInt() * -1;
+    dir = "0";
+  }
+  vel = vel.toInt() * 10.24;
+  deg = data.substring(5,8);
+
+  Serial.println(deg);
+  Serial.println(vel);
+  Serial.println(dir);
 }
