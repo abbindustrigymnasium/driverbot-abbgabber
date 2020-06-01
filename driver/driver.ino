@@ -19,9 +19,6 @@ const int mqttPort = 1883;
 const char* mqttUser = "gabriel.bergdahl@abbindustrigymnasium.se";
 const char* mqttPassword = "qazwsxedc";
 
-// Subbed topic
-// String Sub = "gabriel.bergdahl@abbindustrigymnasium.se/driverbot";
-
 WiFiClient espClient;
 PubSubClient client(espClient);
 
