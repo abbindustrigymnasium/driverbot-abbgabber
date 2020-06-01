@@ -31,7 +31,7 @@ export default {
   mounted() {
     setInterval(() => {
       this.sendPayload();
-    }, 2000);
+    }, 1000);
   },
   methods: {
     sendPayload() {
