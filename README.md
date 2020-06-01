@@ -1,7 +1,3 @@
-# driverbot-abbgabber
-driverbot-abbgabber created by GitHub Classroom
-
-
-## Loggbok
-### 23/3 - 20
-Har byggt klart min bil på skolan
+# Driverbot
+##Projektet
+Våran uppgift var att bygga en bil av lego som man sedan kan styra trådlöst. 
